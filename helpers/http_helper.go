@@ -8,7 +8,7 @@ import (
 
 func SendResponse(w http.ResponseWriter, r *http.Request, data interface{}, status int) {
 	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(status)
 
 	if data == nil {
 		return
