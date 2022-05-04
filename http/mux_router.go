@@ -38,6 +38,6 @@ func (m *MuxRouter) Delete(uri string, f func(w http.ResponseWriter, r *http.Req
 }
 
 func (m *MuxRouter) Serve(port string) {
-	fmt.Println("Mux HTTP server running on port ", port)
+	fmt.Println("Mux HTTP server running on port", port)
 	http.ListenAndServe(":"+port, dispatcher)
 }
