@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
@@ -32,7 +33,7 @@ func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if (u == entity.User{}) {
+	if (reflect.DeepEqual(u, entity.User{})) {
 		helpers.SendResponse(w, r, u, http.StatusNotFound)
 		return
 	}
@@ -74,7 +75,7 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if (u == entity.User{}) {
+	if (reflect.DeepEqual(u, entity.User{})) {
 		helpers.SendResponse(w, r, u, http.StatusNotFound)
 		return
 	}
@@ -98,6 +99,7 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	u.Password = nu.Password
 	u.Email = nu.Email
 	u.Name = nu.Name
+	u.Roles = nu.Roles
 
 	mock.Users = append(mock.Users, u)
 	mock.Users = append(mock.Users[:uIdx], mock.Users[uIdx+1:]...)
@@ -117,7 +119,7 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if (u == entity.User{}) {
+	if (reflect.DeepEqual(u, entity.User{})) {
 		helpers.SendResponse(w, r, u, http.StatusNotFound)
 		return
 	}
