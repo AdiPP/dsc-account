@@ -10,6 +10,7 @@ var User = entity.User{
 	Password: "dummy1234",
 	Email:    "dummy@gmail.com",
 	Name:     "Dummy",
+	Roles:    []entity.Role{AdminRole},
 }
 
 var Users = []entity.User{
