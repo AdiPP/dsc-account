@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"reflect"
 
 	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
-	"github.com/AdiPP/dsc-account/mock"
-	"github.com/google/uuid"
+	"github.com/AdiPP/dsc-account/repository"
 	"github.com/gorilla/mux"
 )
 
@@ -19,22 +17,23 @@ func NewUserController() UserController {
 	return UserController{}
 }
 
+var (
+	userRepository repository.UserRepository = repository.NewUserRepository()
+)
+
 func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
-	helpers.SendResponse(w, r, mock.Users, http.StatusOK)
+	usrs := userRepository.FindAll()
+
+	helpers.SendResponse(w, r, usrs, http.StatusOK)
 }
 
 func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
-	var u entity.User
 	vars := mux.Vars(r)
 
-	for _, item := range mock.Users {
-		if item.ID == vars["user"] {
-			u = item
-		}
-	}
+	u, err := userRepository.FindOrFail(vars["user"])
 
-	if (reflect.DeepEqual(u, entity.User{})) {
-		helpers.SendResponse(w, r, u, http.StatusNotFound)
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusNotFound)
 		return
 	}
 
@@ -46,9 +45,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		panic(err)
-	}
+	json.NewDecoder(r.Body).Decode(&u)
 
 	fails := validateUserRequestBody(u)
 
@@ -57,74 +54,51 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.ID = uuid.NewString()
-	mock.Users = append(mock.Users, u)
+	u, err := userRepository.Save(u)
+
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
+		return
+	}
 
 	helpers.SendResponse(w, r, u, http.StatusCreated)
 }
 
 func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	u := entity.User{}
-	uIdx := int(0)
 	vars := mux.Vars(r)
+	u, err := userRepository.FindOrFail(vars["user"])
 
-	for i, item := range mock.Users {
-		if item.ID == vars["user"] {
-			u = item
-			uIdx = i
-		}
-	}
-
-	if (reflect.DeepEqual(u, entity.User{})) {
-		helpers.SendResponse(w, r, u, http.StatusNotFound)
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusNotFound)
 		return
 	}
 
-	nu := entity.User{}
-
 	defer r.Body.Close()
 
-	if err := json.NewDecoder(r.Body).Decode(&nu); err != nil {
-		panic(err)
-	}
+	json.NewDecoder(r.Body).Decode(&u)
 
-	fails := validateUserRequestBody(nu)
+	fails := validateUserRequestBody(u)
 
 	if len(fails) != 0 {
 		helpers.SendResponse(w, r, fails, http.StatusBadRequest)
 		return
 	}
 
-	u.Username = nu.Username
-	u.Password = nu.Password
-	u.Email = nu.Email
-	u.Name = nu.Name
-	u.Roles = nu.Roles
-
-	mock.Users = append(mock.Users, u)
-	mock.Users = append(mock.Users[:uIdx], mock.Users[uIdx+1:]...)
+	u, _ = userRepository.Update(u)
 
 	helpers.SendResponse(w, r, u, http.StatusOK)
 }
 
 func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	u := entity.User{}
-	uIdx := int(0)
 	vars := mux.Vars(r)
+	u, err := userRepository.FindOrFail(vars["user"])
 
-	for i, item := range mock.Users {
-		if item.ID == vars["user"] {
-			u = item
-			uIdx = i
-		}
-	}
-
-	if (reflect.DeepEqual(u, entity.User{})) {
-		helpers.SendResponse(w, r, u, http.StatusNotFound)
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusNotFound)
 		return
 	}
 
-	mock.Users = append(mock.Users[:uIdx], mock.Users[uIdx+1:]...)
+	u, _ = userRepository.Delete(u)
 
 	helpers.SendResponse(w, r, u, http.StatusOK)
 }
