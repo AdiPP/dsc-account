@@ -15,24 +15,24 @@ func NewUserRepository() UserRepository {
 	return UserRepository{}
 }
 
-func (ur *UserRepository) Find(id string) entity.User {
-	for _, item := range mock.Users {
+func (ur *UserRepository) Find(id string) (entity.User, int) {
+	for i, item := range mock.Users {
 		if item.ID == id {
-			return item
+			return item, i
 		}
 	}
 
-	return entity.User{}
+	return entity.User{}, 0
 }
 
-func (ur *UserRepository) FindOrFail(id string) (entity.User, error) {
-	u := ur.Find(id)
+func (ur *UserRepository) FindOrFail(id string) (entity.User, int, error) {
+	u, idx := ur.Find(id)
 
 	if !reflect.DeepEqual(u, entity.User{}) {
-		return u, nil
+		return u, 0, nil
 	}
 
-	return u, errors.New("user does not exists")
+	return u, idx, errors.New("user does not exists")
 }
 
 func (ur *UserRepository) FindAll() []entity.User {
@@ -47,24 +47,25 @@ func (ur *UserRepository) Save(u entity.User) (entity.User, error) {
 }
 
 func (ur *UserRepository) Update(u entity.User) (entity.User, error) {
-	for i, item := range mock.Users {
-		if item.ID == u.ID {
-			mock.Users = append(mock.Users[:i], mock.Users[i+1:]...)
-			mock.Users = append(mock.Users, u)
-			return u, nil
-		}
+	u, idx, err := ur.FindOrFail(u.ID)
+
+	if err != nil {
+		return entity.User{}, err
 	}
 
-	return u, errors.New("user does not exists")
+	mock.Users = append(mock.Users[:idx], mock.Users[idx+1:]...)
+	mock.Users = append(mock.Users, u)
+
+	return u, nil
 }
 
 func (ur *UserRepository) Delete(u entity.User) (entity.User, error) {
-	for i, item := range mock.Users {
-		if item.ID == u.ID {
-			mock.Users = append(mock.Users[:i], mock.Users[i+1:]...)
-			return u, nil
-		}
+	u, idx, err := ur.FindOrFail(u.ID)
+
+	if err != nil {
+		return entity.User{}, err
 	}
 
-	return u, errors.New("user does not exists")
+	mock.Users = append(mock.Users[:idx], mock.Users[idx+1:]...)
+	return u, nil
 }
