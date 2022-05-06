@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
-	"github.com/AdiPP/dsc-account/mock"
+	"github.com/AdiPP/dsc-account/repository"
 	"github.com/AdiPP/dsc-account/service"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -16,7 +15,8 @@ import (
 type MiddlewareAdapter func(http.Handler) http.Handler
 
 var (
-	tokenService service.TokenService = service.NewTokenService()
+	tokenService   service.TokenService      = service.NewTokenService()
+	userRepository repository.UserRepository = repository.NewUserRepository()
 )
 
 func Middleware(handler http.Handler, middlewareAdapters ...MiddlewareAdapter) http.Handler {
@@ -60,25 +60,20 @@ func HasRoles(roles ...string) MiddlewareAdapter {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			jwtTknStr, _ := getToken(r)
+			jwtTkn, err := tokenService.ValidateToken(jwtTknStr)
 
-			jwtTkn, _ := jwt.Parse(jwtTknStr, func(token *jwt.Token) (interface{}, error) {
-				return service.JwtKey, nil
-			})
-
-			claims, ok := jwtTkn.Claims.(jwt.MapClaims)
-
-			if !ok || !jwtTkn.Valid {
-				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+			if err != nil {
+				helpers.SendResponse(w, r, nil, http.StatusForbidden)
 				return
 			}
 
-			usrnm := claims["username"]
-			u := entity.User{}
+			clms, _ := jwtTkn.Claims.(jwt.MapClaims)
 
-			for _, item := range mock.Users {
-				if item.Username == usrnm {
-					u = item
-				}
+			u, _, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
+
+			if err != nil {
+				helpers.SendResponse(w, r, nil, http.StatusNotFound)
+				return
 			}
 
 			if !u.HasAnyRoles(roles...) {

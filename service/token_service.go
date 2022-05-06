@@ -33,7 +33,6 @@ func NewTokenService() TokenService {
 
 var (
 	jwtKey = []byte("expecto_patronum")
-	JwtKey = jwtKey
 )
 
 func (ts *TokenService) IssueToken(u entity.User, crdn Credential) (Token, error) {
@@ -96,9 +95,7 @@ func (ts *TokenService) RefreshToken(jwtTknStr string) (Token, error) {
 }
 
 func (ts *TokenService) ValidateToken(jwtTknStr string) (*jwt.Token, error) {
-	clm := Claim{}
-
-	jwtTkn, err := jwt.ParseWithClaims(jwtTknStr, &clm, func(t *jwt.Token) (interface{}, error) {
+	jwtTkn, err := jwt.Parse(jwtTknStr, func(t *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
@@ -114,9 +111,10 @@ func (ts *TokenService) ValidateToken(jwtTknStr string) (*jwt.Token, error) {
 		return jwtTkn, errors.New("unauthorized")
 	}
 
-	if time.Until(clm.ExpiresAt.Time).Seconds() < 0 {
-		return jwtTkn, errors.New("bad request")
-	}
+	// Todo: make sure the !jwtTkn.Valid is sufficient to validate the token
+	// if time.Until(clm.ExpiresAt.Time).Seconds() < 0 {
+	// 	return jwtTkn, errors.New("bad request")
+	// }
 
 	return jwtTkn, nil
 }
