@@ -1,17 +1,19 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/AdiPP/dsc-account/controller"
 	"github.com/AdiPP/dsc-account/helpers"
-	router "github.com/AdiPP/dsc-account/http"
 	"github.com/AdiPP/dsc-account/service"
+	"github.com/gorilla/mux"
 )
 
 var (
-	httpRouter      router.Router              = router.NewMuxRouter()
+	httpRouter      *mux.Router                = mux.NewRouter()
 	pingController  controller.PingController  = controller.NewPingController()
 	tokenController controller.TokenController = controller.NewTokenController()
 	userController  controller.UserController  = controller.NewUserController()
@@ -21,23 +23,40 @@ var (
 func main() {
 	const port string = "8080"
 
-	httpRouter.Get("/api/ping", pingController.Ping)
+	httpRouter.Use(loggingMiddleware)
+
+	apiRoute := httpRouter.PathPrefix("/api").Subrouter()
+
+	// Ping
+	pingRoute := apiRoute.Methods(http.MethodGet).Subrouter()
+	pingRoute.HandleFunc("/ping", pingController.Ping).Methods(http.MethodGet)
 
 	// Token
-	httpRouter.Post("/api/tokens", tokenController.IssueToken)
-	httpRouter.Post("/api/tokens/refresh", Auth(tokenController.RefreshToken))
+	tknRoute := apiRoute.Methods(http.MethodPost).Subrouter()
+	tknRoute.HandleFunc("/tokens", tokenController.IssueToken).Methods(http.MethodPost)
+	tknRoute.HandleFunc("/tokens/refresh", tokenController.RefreshToken).Methods(http.MethodPost)
 
 	// User
-	httpRouter.Get("/api/users", Auth(userController.GetUsers))
-	httpRouter.Get("/api/users/{user}", Auth(userController.GetUser))
-	httpRouter.Post("/api/users", Auth(userController.CreateUser))
-	httpRouter.Put("/api/users/{user}", Auth(userController.UpdateUser))
-	httpRouter.Delete("/api/users/{user}", Auth(userController.DeleteUser))
+	usrRoute := apiRoute.Methods(http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete).Subrouter()
+	usrRoute.HandleFunc("/users", userController.GetUsers).Methods(http.MethodGet)
+	usrRoute.HandleFunc("/users/{user}", userController.GetUser).Methods(http.MethodGet)
+	usrRoute.HandleFunc("/users", userController.CreateUser).Methods(http.MethodPost)
+	usrRoute.HandleFunc("/users/{user}", userController.UpdateUser).Methods(http.MethodPatch)
+	usrRoute.HandleFunc("/users/{user}", userController.DeleteUser).Methods(http.MethodDelete)
 
-	httpRouter.Serve(port)
+	fmt.Println("Mux HTTP server running on port", port)
+	http.ListenAndServe(":"+port, httpRouter)
+	// httpRouter.Serve(port)
 }
 
-func Auth(hf http.HandlerFunc) http.HandlerFunc {
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func auth(hf http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqToken := r.Header.Get("Authorization")
 		splitToken := strings.Split(reqToken, "Bearer")
