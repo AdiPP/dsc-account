@@ -31,7 +31,10 @@ func NewTokenService() TokenService {
 	return TokenService{}
 }
 
-var jwtKey = []byte("expecto_patronum")
+var (
+	jwtKey = []byte("expecto_patronum")
+	JwtKey = jwtKey
+)
 
 func (ts *TokenService) IssueToken(u entity.User, crdn Credential) (Token, error) {
 	if reflect.DeepEqual(u, entity.User{}) || u.Password != crdn.Password {
