@@ -8,3 +8,23 @@ type User struct {
 	Name     string `json:"name"`
 	Roles    []Role `json:"roles"`
 }
+
+func (u *User) HasRole(role string) bool {
+	for _, val := range u.Roles {
+		if string(val.Name) == role {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (u *User) HasAnyRoles(roles ...string) bool {
+	for _, val := range roles {
+		if u.HasRole(val) {
+			return true
+		}
+	}
+
+	return false
+}

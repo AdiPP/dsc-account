@@ -6,6 +6,7 @@ import (
 
 	"github.com/AdiPP/dsc-account/controller"
 	"github.com/AdiPP/dsc-account/middleware"
+	"github.com/AdiPP/dsc-account/valueobject"
 	"github.com/gorilla/mux"
 )
 
@@ -39,30 +40,35 @@ func main() {
 	).ServeHTTP).Methods(http.MethodPost)
 	tknRoute.HandleFunc("/tokens/refresh", middleware.Middleware(
 		http.HandlerFunc(tokenController.RefreshToken),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodPost)
 
 	// User
 	usrRoute := apiRoute.Methods(http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete).Subrouter()
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.GetUsers),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
+		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodGet)
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.GetUser),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
+		middleware.HasRoles(string(valueobject.Admin), string(valueobject.User)),
 	).ServeHTTP).Methods(http.MethodGet)
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.CreateUser),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
+		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodPost)
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.UpdateUser),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
+		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodPatch)
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.DeleteUser),
-		middleware.Auth(),
+		middleware.AuthMiddleware(),
+		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodDelete)
 
 	fmt.Println("Mux HTTP server running on port", port)
