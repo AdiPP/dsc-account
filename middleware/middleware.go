@@ -6,10 +6,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/repository"
 	"github.com/AdiPP/dsc-account/service"
+	"github.com/AdiPP/dsc-account/valueobject"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/gorilla/mux"
 )
 
 type MiddlewareAdapter func(http.Handler) http.Handler
@@ -59,17 +62,14 @@ func AuthMiddleware() MiddlewareAdapter {
 func HasRoles(roles ...string) MiddlewareAdapter {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			jwtTknStr, _ := getToken(r)
-			jwtTkn, err := tokenService.ValidateToken(jwtTknStr)
+			jwtTknStr, err := getToken(r)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusForbidden)
+				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
 				return
 			}
 
-			clms, _ := jwtTkn.Claims.(jwt.MapClaims)
-
-			u, _, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
+			u, err := getAuthUser(jwtTknStr)
 
 			if err != nil {
 				helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -77,6 +77,45 @@ func HasRoles(roles ...string) MiddlewareAdapter {
 			}
 
 			if !u.HasAnyRoles(roles...) {
+				helpers.SendResponse(w, r, nil, http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func CanShowUser() MiddlewareAdapter {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			jwtTknStr, err := getToken(r)
+
+			if err != nil {
+				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+				return
+			}
+
+			authUsr, err := getAuthUser(jwtTknStr)
+
+			if err != nil {
+				helpers.SendResponse(w, r, nil, http.StatusNotFound)
+				return
+			}
+
+			vars := mux.Vars(r)
+			u, _, err := userRepository.FindOrFail(vars["user"])
+
+			if err != nil {
+				helpers.SendResponse(w, r, nil, http.StatusNotFound)
+				return
+			}
+
+			if authUsr.HasRole(string(valueobject.Admin)) {
+				next.ServeHTTP(w, r)
+			}
+
+			if authUsr.ID != u.ID {
 				helpers.SendResponse(w, r, nil, http.StatusForbidden)
 				return
 			}
@@ -97,4 +136,22 @@ func getToken(r *http.Request) (string, error) {
 	token := strings.TrimSpace(splitToken[1])
 
 	return token, nil
+}
+
+func getAuthUser(jwtTknStr string) (entity.User, error) {
+	jwtTkn, err := tokenService.ValidateToken(jwtTknStr)
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	clms, _ := jwtTkn.Claims.(jwt.MapClaims)
+
+	u, _, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
+
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }

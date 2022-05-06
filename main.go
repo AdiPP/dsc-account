@@ -29,15 +29,18 @@ func main() {
 
 	// Ping
 	pingRoute := apiRoute.Methods(http.MethodGet).Subrouter()
+
 	pingRoute.HandleFunc("/ping", middleware.Middleware(
 		http.HandlerFunc(pingController.Ping),
 	).ServeHTTP).Methods(http.MethodGet)
 
 	// Token
 	tknRoute := apiRoute.Methods(http.MethodPost).Subrouter()
+
 	tknRoute.HandleFunc("/tokens", middleware.Middleware(
 		http.HandlerFunc(tokenController.IssueToken),
 	).ServeHTTP).Methods(http.MethodPost)
+
 	tknRoute.HandleFunc("/tokens/refresh", middleware.Middleware(
 		http.HandlerFunc(tokenController.RefreshToken),
 		middleware.AuthMiddleware(),
@@ -45,26 +48,32 @@ func main() {
 
 	// User
 	usrRoute := apiRoute.Methods(http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete).Subrouter()
+
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.GetUsers),
 		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodGet)
+
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.GetUser),
 		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin), string(valueobject.User)),
+		middleware.CanShowUser(),
 	).ServeHTTP).Methods(http.MethodGet)
+
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.CreateUser),
 		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodPost)
+
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.UpdateUser),
 		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
 	).ServeHTTP).Methods(http.MethodPatch)
+
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.DeleteUser),
 		middleware.AuthMiddleware(),
