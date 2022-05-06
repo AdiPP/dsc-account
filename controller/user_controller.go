@@ -8,6 +8,7 @@ import (
 	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/repository"
+	"github.com/AdiPP/dsc-account/service"
 	"github.com/gorilla/mux"
 )
 
@@ -19,6 +20,7 @@ func NewUserController() UserController {
 
 var (
 	userRepository repository.UserRepository = repository.NewUserRepository()
+	userService    service.UserService       = service.NewUserService()
 )
 
 func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +56,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := userRepository.Save(u)
+	u, err := userService.Create(u)
 
 	if err != nil {
 		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
@@ -84,7 +86,12 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, _ = userRepository.Update(u)
+	u, err = userService.Update(u)
+
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusUnprocessableEntity)
+		return
+	}
 
 	helpers.SendResponse(w, r, u, http.StatusOK)
 }
@@ -98,7 +105,12 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, _ = userRepository.Delete(u)
+	u, err = userService.Delete(u)
+
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusUnprocessableEntity)
+		return
+	}
 
 	helpers.SendResponse(w, r, u, http.StatusOK)
 }
