@@ -25,14 +25,34 @@ func (ur *UserRepository) Find(id string) (entity.User, int) {
 	return entity.User{}, 0
 }
 
+func (ur *UserRepository) FindByUsername(username string) (entity.User, int) {
+	for i, item := range mock.Users {
+		if item.Username == username {
+			return item, i
+		}
+	}
+
+	return entity.User{}, 0
+}
+
 func (ur *UserRepository) FindOrFail(id string) (entity.User, int, error) {
 	u, idx := ur.Find(id)
 
 	if !reflect.DeepEqual(u, entity.User{}) {
-		return u, 0, nil
+		return u, idx, nil
 	}
 
-	return u, idx, errors.New("user does not exists")
+	return u, 0, errors.New("user does not exists")
+}
+
+func (ur *UserRepository) FindByUsernameOrFail(username string) (entity.User, int, error) {
+	u, idx := ur.FindByUsername(username)
+
+	if !reflect.DeepEqual(u, entity.User{}) {
+		return u, idx, nil
+	}
+
+	return u, 0, errors.New("user does not exists")
 }
 
 func (ur *UserRepository) FindAll() []entity.User {
