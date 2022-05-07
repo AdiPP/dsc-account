@@ -1,42 +1,46 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/mock"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type Database struct {
+type PostgresSqlDatabase struct {
 	DB *gorm.DB
 }
 
-func NewDatabase() Database {
-	db, err := gorm.Open(sqlite.Open("account.db"), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
+func NewPostgresSqlDatabase() PostgresSqlDatabase {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, dbname, port)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Warn),
 	})
 
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	return Database{
+	return PostgresSqlDatabase{
 		DB: db,
 	}
 }
 
-func (d *Database) Init() {
+func (d *PostgresSqlDatabase) Init() {
 	d.Migrate()
 	d.Seed()
 }
 
-func (d *Database) Migrate() {
+func (d *PostgresSqlDatabase) Migrate() {
 	// Run migrations
 	d.DB.AutoMigrate(&entity.User{}, &entity.Role{})
 }
 
-func (d *Database) Seed() {
+func (d *PostgresSqlDatabase) Seed() {
 	// Run seeders
 	roles := mock.Roles
 

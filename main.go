@@ -7,12 +7,12 @@ import (
 )
 
 var (
-	muxRouter routes.MuxRouter  = routes.NewMuxRouter()
-	db        database.Database = database.NewDatabase()
+	muxRouter           routes.MuxRouter             = routes.NewMuxRouter()
+	postgresSqlDatabase database.PostgresSqlDatabase = database.NewPostgresSqlDatabase()
 )
 
 func init() {
-	db.Init()
+	postgresSqlDatabase.Init()
 	muxRouter.InitMiddleware(middleware.LoggingMiddleware)
 	muxRouter.InitApiRoutes()
 }
