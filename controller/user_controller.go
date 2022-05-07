@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -44,13 +43,13 @@ func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	u := entity.User{}
+	req := entity.JsonCreateUserRequest{}
 
 	defer r.Body.Close()
 
-	json.NewDecoder(r.Body).Decode(&u)
+	json.NewDecoder(r.Body).Decode(&req)
 
-	fmt.Println(u)
+	u := req.MapToUser()
 
 	fails := validateUserRequestBody(u)
 
@@ -71,16 +70,21 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	u, err := userRepository.FindOrFail(vars["user"])
+	req := entity.JsonUpdateUserRequest{}
+
+	defer r.Body.Close()
+
+	json.NewDecoder(r.Body).Decode(&req)
+
+	req.ID = vars["user"]
+	_, err := userRepository.FindOrFail(req.ID)
 
 	if err != nil {
 		helpers.SendResponse(w, r, nil, http.StatusNotFound)
 		return
 	}
 
-	defer r.Body.Close()
-
-	json.NewDecoder(r.Body).Decode(&u)
+	u := req.MapToUser()
 
 	fails := validateUserRequestBody(u)
 

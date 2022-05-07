@@ -8,6 +8,7 @@ import (
 
 	"github.com/AdiPP/dsc-account/entity"
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Credential struct {
@@ -67,8 +68,14 @@ func (ts *TokenService) IssueToken(crdn Credential) (Token, error) {
 		return Token{}, err
 	}
 
-	if reflect.DeepEqual(u, entity.User{}) || u.Password != crdn.Password {
-		return Token{}, errors.New("credential is invalid")
+	if reflect.DeepEqual(u, entity.User{}) {
+		return Token{}, errors.New("user does not exists")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(crdn.Password))
+
+	if err != nil {
+		return Token{}, errors.New("invalid credential")
 	}
 
 	ExpiresAt := jwt.NewNumericDate(time.Now().Add(time.Minute * 5))
