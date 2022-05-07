@@ -1,0 +1,698 @@
+{
+	"info": {
+		"_postman_id": "1db79c41-137a-44a0-a267-f3693b48df94",
+		"name": "DCS Account",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Auth Me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auth/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Auth Me",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/auth/me",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"auth",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:49:19 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "428"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"4f9d7872-85ff-40e6-b068-232ab1b009da\",\n    \"created_at\": \"2022-05-07T17:46:55.050142256Z\",\n    \"updated_at\": \"2022-05-07T17:46:55.050142256Z\",\n    \"deleted_at\": null,\n    \"username\": \"admin\",\n    \"email\": \"admin@mail.com\",\n    \"name\": \"Administrator\",\n    \"roles\": [\n        {\n            \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n            \"created_at\": \"2022-05-07T17:46:52.319219737Z\",\n            \"updated_at\": \"2022-05-07T17:46:52.319219737Z\",\n            \"deleted_at\": null,\n            \"name\": \"admin\",\n            \"label\": \"Administrator\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Issue Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"avada_kedavra\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tokens",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tokens"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Issue Token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"avada_kedavra\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/tokens",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tokens"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:48:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "254"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 299,\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBtYWlsLmNvbSIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiZXhwIjoxNjUxOTQ2MDM5fQ.vPpqbpLwUjtDXqUp9ehuDcdOffSVe7J9nLGOBbXTenY\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tokens/refresh",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tokens",
+								"refresh"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Refresh Token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/tokens/refresh",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"tokens",
+										"refresh"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:50:03 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "254"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 299,\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBtYWlsLmNvbSIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiZXhwIjoxNjUxOTQ2MTAzfQ.H3UlfoVQ7jq2uhkJYWqtBbf9uUs9svkAtXk9-8Ka60U\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Users",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/users",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:52:03 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "853"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": \"4f9d7872-85ff-40e6-b068-232ab1b009da\",\n        \"created_at\": \"2022-05-07T17:46:55.050142256Z\",\n        \"updated_at\": \"2022-05-07T17:46:55.050142256Z\",\n        \"deleted_at\": null,\n        \"username\": \"admin\",\n        \"email\": \"admin@mail.com\",\n        \"name\": \"Administrator\",\n        \"roles\": [\n            {\n                \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n                \"created_at\": \"2022-05-07T17:46:52.319219737Z\",\n                \"updated_at\": \"2022-05-07T17:46:52.319219737Z\",\n                \"deleted_at\": null,\n                \"name\": \"admin\",\n                \"label\": \"Administrator\"\n            }\n        ]\n    },\n    {\n        \"id\": \"88fe2abc-28e9-4200-91a7-520696a456cf\",\n        \"created_at\": \"2022-05-07T17:46:56.17944938Z\",\n        \"updated_at\": \"2022-05-07T17:46:56.17944938Z\",\n        \"deleted_at\": null,\n        \"username\": \"basic_user\",\n        \"email\": \"basic_user@mail.com\",\n        \"name\": \"Basic User\",\n        \"roles\": [\n            {\n                \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n                \"created_at\": \"2022-05-07T17:46:53.166920302Z\",\n                \"updated_at\": \"2022-05-07T17:46:53.166920302Z\",\n                \"deleted_at\": null,\n                \"name\": \"user\",\n                \"label\": \"User\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/{{user}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"{{user}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/users/{{user}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"{{user}}"
+									]
+								}
+							},
+							"status": "Found",
+							"code": 302,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:51:48 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "465"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n        \"created_at\": \"2022-05-07T17:46:53.166920302Z\",\n        \"updated_at\": \"2022-05-07T17:46:53.166920302Z\",\n        \"deleted_at\": null,\n        \"name\": \"user\",\n        \"label\": \"User\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"adi_pp\",\n    \"password\": \"opensource\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n            \"name\": \"user\",\n            \"label\": \"User\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/{{user}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"{{user}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update User",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"adi_pp\",\n    \"password\": \"opensource\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n            \"name\": \"user\",\n            \"label\": \"User\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/users/{{user}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"{{user}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:53:41 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "416"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"88fe2abc-28e9-4200-91a7-520696a456cf\",\n    \"created_at\": \"0001-01-01T00:00:00Z\",\n    \"updated_at\": \"2022-05-07T17:53:40.394267063Z\",\n    \"deleted_at\": null,\n    \"username\": \"adi_pp\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n            \"created_at\": \"2022-05-07T17:53:40.395165902Z\",\n            \"updated_at\": \"2022-05-07T17:53:40.395165902Z\",\n            \"deleted_at\": null,\n            \"name\": \"user\",\n            \"label\": \"User\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"adi_pp\",\n    \"password\": \"opensource\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n            \"name\": \"admin\",\n            \"label\": \"Administrator\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"adi_pp\",\n    \"password\": \"opensource\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n            \"name\": \"admin\",\n            \"label\": \"Administrator\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/users",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:52:34 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "434"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"bf92f211-ab6f-4081-adc3-ce0b8e0f6c38\",\n    \"created_at\": \"2022-05-07T17:52:32.55677843Z\",\n    \"updated_at\": \"2022-05-07T17:52:32.55677843Z\",\n    \"deleted_at\": null,\n    \"username\": \"adi_pp\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n            \"created_at\": \"2022-05-07T17:52:32.557402991Z\",\n            \"updated_at\": \"2022-05-07T17:52:32.557402991Z\",\n            \"deleted_at\": null,\n            \"name\": \"admin\",\n            \"label\": \"Administrator\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/{{user}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"{{user}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete User",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/users/{{user}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"{{user}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 17:53:02 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "434"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"bf92f211-ab6f-4081-adc3-ce0b8e0f6c38\",\n    \"created_at\": \"2022-05-07T17:52:32.55677843Z\",\n    \"updated_at\": \"2022-05-07T17:52:32.55677843Z\",\n    \"deleted_at\": null,\n    \"username\": \"adi_pp\",\n    \"email\": \"adiputrapermana@gmail.com\",\n    \"name\": \"Adi Putra\",\n    \"roles\": [\n        {\n            \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n            \"created_at\": \"2022-05-07T17:46:52.319219737Z\",\n            \"updated_at\": \"2022-05-07T17:46:52.319219737Z\",\n            \"deleted_at\": null,\n            \"name\": \"admin\",\n            \"label\": \"Administrator\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "Get Roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/roles",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"roles"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Roles",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/roles",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"roles"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 07 May 2022 20:01:16 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "370"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": \"91e6db60-e820-4645-bad9-bcd59813f4c7\",\n        \"created_at\": \"2022-05-07T19:59:53.966039Z\",\n        \"updated_at\": \"2022-05-07T19:59:53.966039Z\",\n        \"deleted_at\": null,\n        \"name\": \"admin\",\n        \"label\": \"Administrator\"\n    },\n    {\n        \"id\": \"ad562c72-d7ef-4406-bef0-04b43d796ac0\",\n        \"created_at\": \"2022-05-07T19:59:54.018111Z\",\n        \"updated_at\": \"2022-05-07T19:59:54.018111Z\",\n        \"deleted_at\": null,\n        \"name\": \"user\",\n        \"label\": \"User\"\n    }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Ping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/ping",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Ping",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ping",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ping"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 07 May 2022 17:50:26 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "18"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": \"pong\"\n}"
+				}
+			]
+		}
+	]
+}
