@@ -6,12 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/repository"
 	"github.com/AdiPP/dsc-account/service"
 	"github.com/AdiPP/dsc-account/valueobject"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -69,7 +67,7 @@ func HasRoles(roles ...string) MiddlewareAdapter {
 				return
 			}
 
-			authUser, err := getAuthUser(jwtTknStr)
+			authUser, err := tokenService.AuthUser(jwtTknStr)
 
 			if err != nil {
 				helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -96,7 +94,7 @@ func CanShowUser() MiddlewareAdapter {
 				return
 			}
 
-			authUsr, err := getAuthUser(jwtTknStr)
+			authUsr, err := tokenService.AuthUser(jwtTknStr)
 
 			if err != nil {
 				helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -136,22 +134,4 @@ func getToken(r *http.Request) (string, error) {
 	token := strings.TrimSpace(splitToken[1])
 
 	return token, nil
-}
-
-func getAuthUser(jwtTknStr string) (entity.User, error) {
-	jwtTkn, err := tokenService.ValidateToken(jwtTknStr)
-
-	if err != nil {
-		return entity.User{}, err
-	}
-
-	clms, _ := jwtTkn.Claims.(jwt.MapClaims)
-
-	u, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
-
-	if err != nil {
-		return u, err
-	}
-
-	return u, nil
 }

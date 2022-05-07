@@ -39,7 +39,7 @@ func main() {
 	).ServeHTTP).Methods(http.MethodGet)
 
 	// Token
-	tknRoute := apiRoute.Methods(http.MethodPost).Subrouter()
+	tknRoute := apiRoute.Methods(http.MethodPost, http.MethodPost).Subrouter()
 
 	tknRoute.HandleFunc("/tokens", middleware.Middleware(
 		http.HandlerFunc(tokenController.IssueToken),
@@ -49,6 +49,10 @@ func main() {
 		http.HandlerFunc(tokenController.RefreshToken),
 		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodPost)
+
+	tknRoute.HandleFunc("/auth/me", middleware.Middleware(
+		http.HandlerFunc(tokenController.AuthMe),
+	).ServeHTTP).Methods(http.MethodGet)
 
 	// User
 	usrRoute := apiRoute.Methods(http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete).Subrouter()
