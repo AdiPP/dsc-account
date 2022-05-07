@@ -1,12 +1,9 @@
 package repository
 
 import (
-	"errors"
-	"reflect"
-
+	"github.com/AdiPP/dsc-account/database"
 	"github.com/AdiPP/dsc-account/entity"
-	"github.com/AdiPP/dsc-account/mock"
-	"github.com/google/uuid"
+	"gorm.io/gorm/clause"
 )
 
 type UserRepository struct{}
@@ -15,77 +12,64 @@ func NewUserRepository() UserRepository {
 	return UserRepository{}
 }
 
-func (ur *UserRepository) Find(id string) (entity.User, int) {
-	for i, item := range mock.Users {
-		if item.ID == id {
-			return item, i
-		}
-	}
+var (
+	db database.Database = database.NewDatabase()
+)
 
-	return entity.User{}, 0
+func (ur *UserRepository) Find(id string) entity.User {
+	u := entity.User{}
+
+	db.DB.Preload(clause.Associations).First(&u, "id = ?", id)
+
+	return u
 }
 
-func (ur *UserRepository) FindByUsername(username string) (entity.User, int) {
-	for i, item := range mock.Users {
-		if item.Username == username {
-			return item, i
-		}
-	}
+func (ur *UserRepository) FindByUsername(username string) entity.User {
+	u := entity.User{}
 
-	return entity.User{}, 0
+	db.DB.Preload(clause.Associations).First(&u, "username = ?", username)
+
+	return u
 }
 
-func (ur *UserRepository) FindOrFail(id string) (entity.User, int, error) {
-	u, idx := ur.Find(id)
+func (ur *UserRepository) FindOrFail(id string) (entity.User, error) {
+	u := entity.User{}
 
-	if !reflect.DeepEqual(u, entity.User{}) {
-		return u, idx, nil
-	}
+	result := db.DB.Preload(clause.Associations).First(&u, "id = ?", id)
 
-	return u, 0, errors.New("user does not exists")
+	return u, result.Error
 }
 
-func (ur *UserRepository) FindByUsernameOrFail(username string) (entity.User, int, error) {
-	u, idx := ur.FindByUsername(username)
+func (ur *UserRepository) FindByUsernameOrFail(username string) (entity.User, error) {
+	u := entity.User{}
 
-	if !reflect.DeepEqual(u, entity.User{}) {
-		return u, idx, nil
-	}
+	result := db.DB.Preload(clause.Associations).First(&u, "username = ?", username)
 
-	return u, 0, errors.New("user does not exists")
+	return u, result.Error
 }
 
 func (ur *UserRepository) FindAll() []entity.User {
-	return mock.Users
+	usrs := []entity.User{}
+
+	db.DB.Preload(clause.Associations).Find(&usrs)
+
+	return usrs
 }
 
 func (ur *UserRepository) Save(u entity.User) (entity.User, error) {
-	u.ID = uuid.NewString()
-	mock.Users = append(mock.Users, u)
+	db.DB.Save(&u)
 
 	return u, nil
 }
 
 func (ur *UserRepository) Update(u entity.User) (entity.User, error) {
-	u, idx, err := ur.FindOrFail(u.ID)
-
-	if err != nil {
-		return entity.User{}, err
-	}
-
-	mock.Users = append(mock.Users[:idx], mock.Users[idx+1:]...)
-	mock.Users = append(mock.Users, u)
+	db.DB.Save(&u)
 
 	return u, nil
 }
 
 func (ur *UserRepository) Delete(u entity.User) (entity.User, error) {
-	u, idx, err := ur.FindOrFail(u.ID)
+	db.DB.Delete(&entity.User{}, u.ID)
 
-	if err != nil {
-		return entity.User{}, err
-	}
-
-	mock.Users = append(mock.Users[:idx], mock.Users[idx+1:]...)
 	return u, nil
 }

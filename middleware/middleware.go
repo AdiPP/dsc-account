@@ -69,14 +69,14 @@ func HasRoles(roles ...string) MiddlewareAdapter {
 				return
 			}
 
-			u, err := getAuthUser(jwtTknStr)
+			authUser, err := getAuthUser(jwtTknStr)
 
 			if err != nil {
 				helpers.SendResponse(w, r, nil, http.StatusNotFound)
 				return
 			}
 
-			if !u.HasAnyRoles(roles...) {
+			if !authUser.HasAnyRoles(roles...) {
 				helpers.SendResponse(w, r, nil, http.StatusForbidden)
 				return
 			}
@@ -104,7 +104,7 @@ func CanShowUser() MiddlewareAdapter {
 			}
 
 			vars := mux.Vars(r)
-			u, _, err := userRepository.FindOrFail(vars["user"])
+			u, err := userRepository.FindOrFail(vars["user"])
 
 			if err != nil {
 				helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -147,7 +147,7 @@ func getAuthUser(jwtTknStr string) (entity.User, error) {
 
 	clms, _ := jwtTkn.Claims.(jwt.MapClaims)
 
-	u, _, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
+	u, err := userRepository.FindByUsernameOrFail(clms["username"].(string))
 
 	if err != nil {
 		return u, err
