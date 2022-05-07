@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/AdiPP/dsc-account/entity"
+	"github.com/AdiPP/dsc-account/errors"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/repository"
 	"github.com/AdiPP/dsc-account/service"
@@ -35,7 +36,8 @@ func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	u, err := userRepository.FindOrFail(vars["user"])
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusNotFound)
+		es := errors.NewServiceError(err.Error(), http.StatusNotFound)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -54,14 +56,16 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	fails := validateUserRequestBody(u)
 
 	if len(fails) != 0 {
-		helpers.SendResponse(w, r, fails, http.StatusBadRequest)
+		es := errors.NewRequestValidationError(fails, http.StatusBadRequest)
+		helpers.SendResponse(w, r, es.Message, es.StatusCode)
 		return
 	}
 
 	u, err := userService.Create(u)
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -77,10 +81,12 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&req)
 
 	req.ID = vars["user"]
+
 	_, err := userRepository.FindOrFail(req.ID)
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusNotFound)
+		es := errors.NewServiceError(err.Error(), http.StatusNotFound)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -89,14 +95,16 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	fails := validateUserRequestBody(u)
 
 	if len(fails) != 0 {
-		helpers.SendResponse(w, r, fails, http.StatusBadRequest)
+		es := errors.NewRequestValidationError(fails, http.StatusBadRequest)
+		helpers.SendResponse(w, r, es.Message, es.StatusCode)
 		return
 	}
 
 	u, err = userService.Update(u)
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusUnprocessableEntity)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -108,14 +116,16 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	u, err := userRepository.FindOrFail(vars["user"])
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusNotFound)
+		es := errors.NewServiceError(err.Error(), http.StatusNotFound)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
 	u, err = userService.Delete(u)
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusUnprocessableEntity)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 

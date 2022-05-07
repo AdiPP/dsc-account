@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AdiPP/dsc-account/errors"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/service"
 )
@@ -24,7 +25,8 @@ func (tc *TokenController) AuthMe(w http.ResponseWriter, r *http.Request) {
 	splitToken := strings.Split(reqToken, "Bearer")
 
 	if len(splitToken) != 2 {
-		helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+		es := errors.NewServiceError("Unauthorized", http.StatusUnauthorized)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -33,7 +35,9 @@ func (tc *TokenController) AuthMe(w http.ResponseWriter, r *http.Request) {
 	u, err := tokenService.AuthUser(jwtTknStr)
 
 	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
+		return
 	}
 
 	helpers.SendResponse(w, r, u, http.StatusOK)
@@ -47,7 +51,8 @@ func (tc *TokenController) IssueToken(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&crdn)
 
 	if err != nil {
-		helpers.SendResponse(w, r, err, http.StatusBadRequest)
+		es := errors.NewServiceError(err.Error(), http.StatusBadRequest)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -55,11 +60,13 @@ func (tc *TokenController) IssueToken(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err.Error() == "credential is invalid" {
-			helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+			es := errors.NewServiceError(err.Error(), http.StatusUnauthorized)
+			helpers.SendResponse(w, r, es, es.StatusCode)
 			return
 		}
 
-		helpers.SendResponse(w, r, err, http.StatusInternalServerError)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -71,7 +78,8 @@ func (tc *TokenController) RefreshToken(w http.ResponseWriter, r *http.Request) 
 	splitToken := strings.Split(reqToken, "Bearer")
 
 	if len(splitToken) != 2 {
-		helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+		es := errors.NewServiceError("Unauthorized", http.StatusUnauthorized)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
@@ -81,16 +89,19 @@ func (tc *TokenController) RefreshToken(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		if err.Error() == "bad request" {
-			helpers.SendResponse(w, r, nil, http.StatusBadRequest)
+			es := errors.NewServiceError(err.Error(), http.StatusBadRequest)
+			helpers.SendResponse(w, r, es, es.StatusCode)
 			return
 		}
 
 		if err.Error() == "internal server error" {
-			helpers.SendResponse(w, r, nil, http.StatusBadRequest)
+			es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+			helpers.SendResponse(w, r, es, es.StatusCode)
 			return
 		}
 
-		helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+		es := errors.NewServiceError(err.Error(), http.StatusInternalServerError)
+		helpers.SendResponse(w, r, es, es.StatusCode)
 		return
 	}
 
