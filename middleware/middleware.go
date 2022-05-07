@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"errors"
+	baseerror "errors"
 	"log"
 	"net/http"
 	"strings"
 
+	"github.com/AdiPP/dsc-account/errors"
 	"github.com/AdiPP/dsc-account/helpers"
 	"github.com/AdiPP/dsc-account/repository"
 	"github.com/AdiPP/dsc-account/service"
@@ -41,14 +42,16 @@ func AuthMiddleware() MiddlewareAdapter {
 			jwtTknStr, err := getToken(r)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+				es := errors.NewServiceError(err.Error(), http.StatusUnauthorized)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
 			_, err = tokenService.ValidateToken(jwtTknStr)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+				es := errors.NewServiceError(err.Error(), http.StatusUnauthorized)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
@@ -63,19 +66,16 @@ func HasRoles(roles ...string) MiddlewareAdapter {
 			jwtTknStr, err := getToken(r)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+				es := errors.NewServiceError(err.Error(), http.StatusUnauthorized)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
 			authUser, err := tokenService.AuthUser(jwtTknStr)
 
-			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusNotFound)
-				return
-			}
-
-			if !authUser.HasAnyRoles(roles...) {
-				helpers.SendResponse(w, r, nil, http.StatusForbidden)
+			if err != nil || !authUser.HasAnyRoles(roles...) {
+				es := errors.NewServiceError(err.Error(), http.StatusForbidden)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
@@ -90,14 +90,16 @@ func CanShowUser() MiddlewareAdapter {
 			jwtTknStr, err := getToken(r)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+				es := errors.NewServiceError(err.Error(), http.StatusUnauthorized)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
 			authUsr, err := tokenService.AuthUser(jwtTknStr)
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusNotFound)
+				es := errors.NewServiceError(err.Error(), http.StatusForbidden)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
@@ -105,7 +107,8 @@ func CanShowUser() MiddlewareAdapter {
 			u, err := userRepository.FindOrFail(vars["user"])
 
 			if err != nil {
-				helpers.SendResponse(w, r, nil, http.StatusNotFound)
+				es := errors.NewServiceError(err.Error(), http.StatusNotFound)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
@@ -114,7 +117,8 @@ func CanShowUser() MiddlewareAdapter {
 			}
 
 			if authUsr.ID != u.ID {
-				helpers.SendResponse(w, r, nil, http.StatusForbidden)
+				es := errors.NewServiceError("forbidden", http.StatusForbidden)
+				helpers.SendResponse(w, r, es, es.StatusCode)
 				return
 			}
 
@@ -128,7 +132,7 @@ func getToken(r *http.Request) (string, error) {
 	splitToken := strings.Split(reqToken, "Bearer")
 
 	if len(splitToken) != 2 {
-		return "", errors.New("unauthorized")
+		return "", baseerror.New("unauthorized")
 	}
 
 	token := strings.TrimSpace(splitToken[1])
