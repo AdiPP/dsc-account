@@ -39,7 +39,7 @@ func main() {
 	).ServeHTTP).Methods(http.MethodGet)
 
 	// Token
-	tknRoute := apiRoute.Methods(http.MethodPost, http.MethodPost).Subrouter()
+	tknRoute := apiRoute.Methods(http.MethodPost, http.MethodGet).Subrouter()
 
 	tknRoute.HandleFunc("/tokens", middleware.Middleware(
 		http.HandlerFunc(tokenController.IssueToken),
