@@ -13,13 +13,13 @@ func NewUserRepository() UserRepository {
 }
 
 var (
-	db database.Database = database.NewDatabase()
+	postgresSqlDatabase database.PostgresSqlDatabase = database.NewPostgresSqlDatabase()
 )
 
 func (ur *UserRepository) Find(id string) entity.User {
 	u := entity.User{}
 
-	db.DB.Preload(clause.Associations).First(&u, "id = ?", id)
+	postgresSqlDatabase.DB.Preload(clause.Associations).First(&u, "id = ?", id)
 
 	return u
 }
@@ -27,7 +27,7 @@ func (ur *UserRepository) Find(id string) entity.User {
 func (ur *UserRepository) FindByUsername(username string) entity.User {
 	u := entity.User{}
 
-	db.DB.Preload(clause.Associations).First(&u, "username = ?", username)
+	postgresSqlDatabase.DB.Preload(clause.Associations).First(&u, "username = ?", username)
 
 	return u
 }
@@ -35,7 +35,7 @@ func (ur *UserRepository) FindByUsername(username string) entity.User {
 func (ur *UserRepository) FindOrFail(id string) (entity.User, error) {
 	u := entity.User{}
 
-	result := db.DB.Preload(clause.Associations).First(&u, "id = ?", id)
+	result := postgresSqlDatabase.DB.Preload(clause.Associations).First(&u, "id = ?", id)
 
 	return u, result.Error
 }
@@ -43,7 +43,7 @@ func (ur *UserRepository) FindOrFail(id string) (entity.User, error) {
 func (ur *UserRepository) FindByUsernameOrFail(username string) (entity.User, error) {
 	u := entity.User{}
 
-	result := db.DB.Preload(clause.Associations).First(&u, "username = ?", username)
+	result := postgresSqlDatabase.DB.Preload(clause.Associations).First(&u, "username = ?", username)
 
 	return u, result.Error
 }
@@ -51,25 +51,25 @@ func (ur *UserRepository) FindByUsernameOrFail(username string) (entity.User, er
 func (ur *UserRepository) FindAll() []entity.User {
 	usrs := []entity.User{}
 
-	db.DB.Preload(clause.Associations).Find(&usrs)
+	postgresSqlDatabase.DB.Preload(clause.Associations).Find(&usrs)
 
 	return usrs
 }
 
 func (ur *UserRepository) Save(u entity.User) (entity.User, error) {
-	db.DB.Save(&u)
+	postgresSqlDatabase.DB.Save(&u)
 
 	return u, nil
 }
 
 func (ur *UserRepository) Update(u entity.User) (entity.User, error) {
-	db.DB.Save(&u)
+	postgresSqlDatabase.DB.Model(&u).Omit("CreatedAt").Updates(u)
 
 	return u, nil
 }
 
 func (ur *UserRepository) Delete(u entity.User) (entity.User, error) {
-	db.DB.Delete(&entity.User{}, u.ID)
+	postgresSqlDatabase.DB.Delete(&u)
 
 	return u, nil
 }
