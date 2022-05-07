@@ -13,6 +13,7 @@ var (
 	pingController  controller.PingController  = controller.NewPingController()
 	tokenController controller.TokenController = controller.NewTokenController()
 	userController  controller.UserController  = controller.NewUserController()
+	roleController  controller.RoleController  = controller.NewRoleController()
 )
 
 func apiRoutes(apiRoute *mux.Router) {
@@ -37,6 +38,15 @@ func apiRoutes(apiRoute *mux.Router) {
 
 	tknRoute.HandleFunc("/auth/me", middleware.Middleware(
 		http.HandlerFunc(tokenController.AuthMe),
+	).ServeHTTP).Methods(http.MethodGet)
+
+	// Roles
+	rlRoute := apiRoute.Methods(http.MethodGet).Subrouter()
+
+	rlRoute.HandleFunc("/roles", middleware.Middleware(
+		http.HandlerFunc(roleController.GetRoles),
+		middleware.HasRoles(string(valueobject.Admin)),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodGet)
 
 	// User

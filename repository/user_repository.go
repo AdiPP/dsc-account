@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/AdiPP/dsc-account/database"
 	"github.com/AdiPP/dsc-account/entity"
 	"gorm.io/gorm/clause"
 )
@@ -11,10 +10,6 @@ type UserRepository struct{}
 func NewUserRepository() UserRepository {
 	return UserRepository{}
 }
-
-var (
-	postgresSqlDatabase database.PostgresSqlDatabase = database.NewPostgresSqlDatabase()
-)
 
 func (ur *UserRepository) Find(id string) entity.User {
 	u := entity.User{}
