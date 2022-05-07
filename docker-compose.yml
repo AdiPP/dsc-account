@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: "dsc-account-api"
+    ports:
+      - "8080:8080"
