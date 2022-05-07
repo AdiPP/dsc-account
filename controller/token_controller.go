@@ -19,6 +19,26 @@ var (
 	tokenService service.TokenService = service.NewTokenService()
 )
 
+func (tc *TokenController) AuthMe(w http.ResponseWriter, r *http.Request) {
+	reqToken := r.Header.Get("Authorization")
+	splitToken := strings.Split(reqToken, "Bearer")
+
+	if len(splitToken) != 2 {
+		helpers.SendResponse(w, r, nil, http.StatusUnauthorized)
+		return
+	}
+
+	jwtTknStr := strings.TrimSpace(splitToken[1])
+
+	u, err := tokenService.AuthUser(jwtTknStr)
+
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
+	}
+
+	helpers.SendResponse(w, r, u, http.StatusOK)
+}
+
 func (tc *TokenController) IssueToken(w http.ResponseWriter, r *http.Request) {
 	crdn := service.Credential{}
 
@@ -31,14 +51,7 @@ func (tc *TokenController) IssueToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := userRepository.FindByUsernameOrFail(crdn.Username)
-
-	if err != nil {
-		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
-		return
-	}
-
-	tkn, err := tokenService.IssueToken(u, crdn)
+	tkn, err := tokenService.IssueToken(crdn)
 
 	if err != nil {
 		if err.Error() == "credential is invalid" {

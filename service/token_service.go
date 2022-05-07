@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 	"time"
@@ -16,6 +17,8 @@ type Credential struct {
 
 type Claim struct {
 	Username string `json:"username"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
 	jwt.RegisteredClaims
 }
 
@@ -35,7 +38,35 @@ var (
 	jwtKey = []byte("expecto_patronum")
 )
 
-func (ts *TokenService) IssueToken(u entity.User, crdn Credential) (Token, error) {
+func (ts *TokenService) AuthUser(jwtTknStr string) (entity.User, error) {
+	jwtTkn, err := validateToken(jwtTknStr)
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	clm, err := covertJwtTokenToClaim(jwtTkn)
+
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	u, err := userRepository.FindByUsernameOrFail(clm.Username)
+
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
+}
+
+func (ts *TokenService) IssueToken(crdn Credential) (Token, error) {
+	u, err := userRepository.FindByUsernameOrFail(crdn.Username)
+
+	if err != nil {
+		return Token{}, err
+	}
+
 	if reflect.DeepEqual(u, entity.User{}) || u.Password != crdn.Password {
 		return Token{}, errors.New("credential is invalid")
 	}
@@ -43,7 +74,9 @@ func (ts *TokenService) IssueToken(u entity.User, crdn Credential) (Token, error
 	ExpiresAt := jwt.NewNumericDate(time.Now().Add(time.Minute * 5))
 
 	clm := Claim{
-		Username: crdn.Username,
+		Username: u.Username,
+		Email:    u.Email,
+		Name:     u.Name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: ExpiresAt,
 		},
@@ -67,18 +100,22 @@ func (ts *TokenService) IssueToken(u entity.User, crdn Credential) (Token, error
 }
 
 func (ts *TokenService) RefreshToken(jwtTknStr string) (Token, error) {
-	clm := Claim{}
-
-	_, err := ts.ValidateToken(jwtTknStr)
+	jwtTkn, err := validateToken(jwtTknStr)
 
 	if err != nil {
 		return Token{}, err
 	}
 
-	ExpiresAt := jwt.NewNumericDate(time.Now().Add(time.Minute * 5))
-	clm.ExpiresAt = ExpiresAt
+	clm, err := covertJwtTokenToClaim(jwtTkn)
 
-	jwtTkn := jwt.NewWithClaims(jwt.SigningMethodHS256, clm)
+	if err != nil {
+		return Token{}, err
+	}
+
+	clm.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 5))
+
+	jwtTkn = jwt.NewWithClaims(jwt.SigningMethodHS256, clm)
+
 	jwtTknStrng, _ := jwtTkn.SignedString(jwtKey)
 
 	if err != nil {
@@ -87,7 +124,7 @@ func (ts *TokenService) RefreshToken(jwtTknStr string) (Token, error) {
 
 	tkn := Token{
 		TokenType:   "Bearer",
-		ExpiresIn:   int(time.Until(ExpiresAt.Time).Seconds()),
+		ExpiresIn:   int(time.Until(clm.ExpiresAt.Time).Seconds()),
 		AccessToken: jwtTknStrng,
 	}
 
@@ -95,6 +132,10 @@ func (ts *TokenService) RefreshToken(jwtTknStr string) (Token, error) {
 }
 
 func (ts *TokenService) ValidateToken(jwtTknStr string) (*jwt.Token, error) {
+	return validateToken(jwtTknStr)
+}
+
+func validateToken(jwtTknStr string) (*jwt.Token, error) {
 	jwtTkn, err := jwt.Parse(jwtTknStr, func(t *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
@@ -111,10 +152,36 @@ func (ts *TokenService) ValidateToken(jwtTknStr string) (*jwt.Token, error) {
 		return jwtTkn, errors.New("unauthorized")
 	}
 
-	// Todo: make sure the !jwtTkn.Valid is sufficient to validate the token
-	// if time.Until(clm.ExpiresAt.Time).Seconds() < 0 {
-	// 	return jwtTkn, errors.New("bad request")
-	// }
-
 	return jwtTkn, nil
+}
+
+func covertJwtTokenToClaim(jwtTkn *jwt.Token) (Claim, error) {
+	clmsMap, ok := jwtTkn.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return Claim{}, errors.New("")
+	}
+
+	var expUnix int64
+
+	switch exp := clmsMap["exp"].(type) {
+	case float64:
+		expUnix = int64(exp)
+	case json.Number:
+		v, _ := exp.Int64()
+		expUnix = int64(v)
+	}
+
+	ExpiresAt := jwt.NewNumericDate(time.Unix(expUnix, 0))
+
+	clm := Claim{
+		Username: clmsMap["username"].(string),
+		Email:    clmsMap["email"].(string),
+		Name:     clmsMap["name"].(string),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: ExpiresAt,
+		},
+	}
+
+	return clm, nil
 }
