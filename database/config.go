@@ -1,9 +1,9 @@
 package database
 
 var (
-	host     = "localhost"
-	user     = "developer"
-	password = "developer"
-	dbname   = "account"
+	host     = "postgres_container"
+	user     = "postgres"
+	password = "postgres"
+	dbname   = "postgres"
 	port     = "5432"
 )
