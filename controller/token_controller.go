@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AdiPP/dsc-account/entity"
 	"github.com/AdiPP/dsc-account/helpers"
-	"github.com/AdiPP/dsc-account/mock"
 	"github.com/AdiPP/dsc-account/service"
 )
 
@@ -33,12 +31,11 @@ func (tc *TokenController) IssueToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := entity.User{}
+	u, err := userRepository.FindByUsernameOrFail(crdn.Username)
 
-	for _, item := range mock.Users {
-		if item.Username == crdn.Username {
-			u = item
-		}
+	if err != nil {
+		helpers.SendResponse(w, r, nil, http.StatusInternalServerError)
+		return
 	}
 
 	tkn, err := tokenService.IssueToken(u, crdn)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/AdiPP/dsc-account/controller"
+	"github.com/AdiPP/dsc-account/database"
 	"github.com/AdiPP/dsc-account/middleware"
 	"github.com/AdiPP/dsc-account/valueobject"
 	"github.com/gorilla/mux"
@@ -15,9 +16,12 @@ var (
 	pingController  controller.PingController  = controller.NewPingController()
 	tokenController controller.TokenController = controller.NewTokenController()
 	userController  controller.UserController  = controller.NewUserController()
+	db              database.Database          = database.NewDatabase()
 )
 
 func init() {
+	db.Init()
+
 	httpRouter.Use(middleware.LoggingMiddleware)
 }
 
@@ -51,33 +55,33 @@ func main() {
 
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.GetUsers),
-		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodGet)
 
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.GetUser),
-		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin), string(valueobject.User)),
 		middleware.CanShowUser(),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodGet)
 
 	usrRoute.HandleFunc("/users", middleware.Middleware(
 		http.HandlerFunc(userController.CreateUser),
-		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodPost)
 
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.UpdateUser),
-		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodPatch)
 
 	usrRoute.HandleFunc("/users/{user}", middleware.Middleware(
 		http.HandlerFunc(userController.DeleteUser),
-		middleware.AuthMiddleware(),
 		middleware.HasRoles(string(valueobject.Admin)),
+		middleware.AuthMiddleware(),
 	).ServeHTTP).Methods(http.MethodDelete)
 
 	fmt.Println("Mux HTTP server running on port", port)

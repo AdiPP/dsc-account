@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -32,7 +33,7 @@ func (uc *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	u, _, err := userRepository.FindOrFail(vars["user"])
+	u, err := userRepository.FindOrFail(vars["user"])
 
 	if err != nil {
 		helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -48,6 +49,8 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	json.NewDecoder(r.Body).Decode(&u)
+
+	fmt.Println(u)
 
 	fails := validateUserRequestBody(u)
 
@@ -68,7 +71,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	u, _, err := userRepository.FindOrFail(vars["user"])
+	u, err := userRepository.FindOrFail(vars["user"])
 
 	if err != nil {
 		helpers.SendResponse(w, r, nil, http.StatusNotFound)
@@ -98,7 +101,7 @@ func (uc *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	u, _, err := userRepository.FindOrFail(vars["user"])
+	u, err := userRepository.FindOrFail(vars["user"])
 
 	if err != nil {
 		helpers.SendResponse(w, r, nil, http.StatusNotFound)
