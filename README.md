@@ -7,8 +7,10 @@ DSC Account Service is a service that aims to manage accounts and SSO (Single Si
 Run docker compose.
 
 ```
-docker composer up
+docker compose up
 ```
+
+![docker](./resources/docker/Screenshot%20from%202022-05-08%2015-42-09.png)
 
 Service running on port `8080`.
 
