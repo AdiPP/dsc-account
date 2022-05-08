@@ -1,19 +1,24 @@
 package main
 
 import (
-	"github.com/AdiPP/dsc-account/controller"
-	router "github.com/AdiPP/dsc-account/http"
+	"github.com/AdiPP/dsc-account/database"
+	"github.com/AdiPP/dsc-account/middleware"
+	"github.com/AdiPP/dsc-account/routes"
 )
 
 var (
-	httpRouter     router.Router             = router.NewMuxRouter()
-	pingController controller.PingController = controller.NewPingController()
+	muxRouter           routes.MuxRouter             = routes.NewMuxRouter()
+	postgresSqlDatabase database.PostgresSqlDatabase = database.NewPostgresSqlDatabase()
 )
+
+func init() {
+	postgresSqlDatabase.Init()
+	muxRouter.InitMiddleware(middleware.LoggingMiddleware)
+	muxRouter.InitApiRoutes()
+}
 
 func main() {
 	const port string = "8080"
 
-	httpRouter.Get("/api/ping", pingController.Ping)
-
-	httpRouter.Serve(port)
+	muxRouter.Serve(port)
 }

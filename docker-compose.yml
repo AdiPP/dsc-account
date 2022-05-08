@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: account_container
+    tty: true
+    build: .
+    ports:
+      - '8080:8080'
+    restart: on-failure
+    depends_on:
+      - postgresdb
+    networks:
+      - account_service
+  
+  postgresdb:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - DATABASE_HOST=5432
+    ports:
+      - '1234:5432'
+    networks:
+      - account_service
+
+networks:
+  account_service:
+    driver: bridge
