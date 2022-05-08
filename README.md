@@ -20,6 +20,28 @@ curl http://localhost:8080/api/ping
 
 Check `resources/postman_collection.json` for more routes and example.
 
+# Flow
+
+### Login
+
+![Login](./resources/flow/DSC%20Account%20Service-Login.drawio.png)
+
+### Create User
+
+![Create User](./resources/flow/DSC%20Account%20Service-Create%20User.drawio.png)
+
+### Get User
+
+![Get User](./resources/flow/DSC%20Account%20Service-Get%20User.drawio.png)
+
+### Update User
+
+![Get User](./resources/flow/DSC%20Account%20Service-Update%20User.drawio.png)
+
+### Delete User
+
+![Get User](./resources/flow/DSC%20Account%20Service-Delete%20User.drawio.png)
+
 # Testing User Credential
 
 Here are some default user credentials that can be used for testing purposes.
